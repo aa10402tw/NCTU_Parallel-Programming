@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
+#include <time.h>
 
 long num_of_trial;
 long num_in_circle;
@@ -30,9 +31,8 @@ void* toss(void* arg) {
 
 int main(int argc, char const *argv[])
 {
-    
+    srand ( time ( NULL));
     num_in_circle = 0;
-
     num_thread = strtoll(argv[1], NULL, 10);
     num_of_trial = strtoll(argv[2], NULL, 10);
     printf("Num of Thread:%ld \t Num of Toss:%ld \n", num_thread, num_of_trial);
