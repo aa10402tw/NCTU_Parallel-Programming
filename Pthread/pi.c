@@ -23,6 +23,7 @@ void* toss(void* arg) {
     }
     pthread_mutex_lock(&mutex);
     /* Critical Section */
+    printf("Local Num %ld", local_num_in_circle);
     num_in_circle += local_num_in_circle;
     /* Critical Section */
     pthread_mutex_unlock(&mutex);
