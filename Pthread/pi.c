@@ -23,7 +23,6 @@ void* toss(void* arg) {
     }
     pthread_mutex_lock(&mutex);
     /* Critical Section */
-    printf("Local Num %ld", local_num_in_circle);
     num_in_circle += local_num_in_circle;
     /* Critical Section */
     pthread_mutex_unlock(&mutex);
@@ -36,7 +35,6 @@ int main(int argc, char const *argv[])
     num_in_circle = 0;
     num_thread = strtoll(argv[1], NULL, 10);
     num_of_trial = strtoll(argv[2], NULL, 10);
-    printf("Num of Thread:%ld \t Num of Toss:%ld \n", num_thread, num_of_trial);
     pthread_mutex_init(&mutex, NULL);
 
     long num_of_trial_per_thread = num_of_trial / num_thread;
@@ -54,7 +52,7 @@ int main(int argc, char const *argv[])
         pthread_join(thread_handles[i], NULL);
     }
     double pi_estimated = (4*num_in_circle) / ((double)num_of_trial);
-    printf("Estimated Pi: %lf\n", pi_estimated);
+    printf("%lf\n", pi_estimated);
 
     pthread_mutex_destroy(&mutex);
     free(thread_handles);
