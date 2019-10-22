@@ -10,14 +10,15 @@ long num_thread;
 pthread_mutex_t mutex;
 
 void* toss(void* arg) {
+    unsigned int seed = time(NULL);
     long num_of_toss = (long)arg;
     long local_num_in_circle = 0;
     int i=0;
     for(i=0; i<num_of_toss; i++) {
         double x, y;
-        x = (double)rand()/RAND_MAX*2.0-1.0;//float in range -1 to 1
-        y = (double)rand()/RAND_MAX*2.0-1.0;//float in range -1 to 1
-        double dist_squared = x*x + y*y;
+        x = (double)rand_r(&seed)/RAND_MAX*2.0-1.0;//float in range -1 to 1
+        y = (double)rand_r(&seed)/RAND_MAX*2.0-1.0;//float in range -1 to 1
+        double dist_squared = (x*x) + (y*y);
         if(dist_squared <= 1)
             local_num_in_circle += 1;
     }
@@ -26,7 +27,7 @@ void* toss(void* arg) {
     num_in_circle += local_num_in_circle;
     /* Critical Section */
     pthread_mutex_unlock(&mutex);
-    return NULL;
+    pthread_exit(NULL);
 }
 
 int main(int argc, char const *argv[])
