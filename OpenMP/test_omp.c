@@ -5,18 +5,15 @@
   
 int main(int argc, char* argv[]) 
 { 
-    int mat[100][100];
-    for(int i=0; i<100; i++) 
-        for(int j=0; j<100; j++)
-            mat[i][j] = i+j;
-
+    int vec[10000];
+    for(int i=0; i<10000; i++)
+        vec[i] = i;
     printf("Sum %d", compute_mat_sum(mat));
 } 
 
-int compute_mat_sum(int[100][100] mat){
+int compute_mat_sum(int mat[]){
     int sum = 0;
-    for(int i=0; i<100; i++) 
-        for(int j=0; j<100; j++)
-            sum += mat[i][j]
+    for(int i=0; i<10000; i++)
+        sum += vec[i];
     return sum;
 }
