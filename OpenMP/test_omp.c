@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 
 int compute_mat_sum(int vec[]){
     int sum = 0, i;
-    omp_set_num_threads(1)
+    omp_set_num_threads(1);
     #pragma omp parallel for reduction (+:sum)
     for(int i=0; i<1000000; i++)
         sum += vec[i];
