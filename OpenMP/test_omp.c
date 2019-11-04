@@ -3,6 +3,8 @@
 #include <stdio.h> 
 #include <stdlib.h> 
   
+int compute_mat_sum(int vec[]);
+
 int main(int argc, char* argv[]) 
 { 
     int vec[10000];
