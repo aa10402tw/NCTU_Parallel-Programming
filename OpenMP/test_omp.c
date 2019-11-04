@@ -5,22 +5,18 @@
   
 int main(int argc, char* argv[]) 
 { 
-    int nthreads, tid; 
-  
-    // Begin of parallel region 
-    #pragma omp parallel private(nthreads, tid) 
-    { 
-        // Getting thread number 
-        tid = omp_get_thread_num(); 
-        printf("Welcome to GFG from thread = %d\n", 
-               tid); 
-  
-        if (tid == 0) { 
-  
-            // Only master thread does this 
-            nthreads = omp_get_num_threads(); 
-            printf("Number of threads = %d\n", 
-                   nthreads); 
-        } 
-    } 
+    int mat[100][100];
+    for(int i=0; i<100; i++) 
+        for(int j=0; j<100; j++)
+            mat[i][j] = i+j;
+
+    printf("Sum %d", compute_mat_sum(mat));
 } 
+
+int compute_mat_sum(int[100][100] mat){
+    int sum = 0;
+    for(int i=0; i<100; i++) 
+        for(int j=0; j<100; j++)
+            sum += mat[i][j]
+    return sum;
+}
