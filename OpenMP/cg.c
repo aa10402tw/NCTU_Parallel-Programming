@@ -355,7 +355,7 @@ static void conj_grad(int colidx[],
     //       on the Cray t3d - overall speed of code is 1.5 times faster.
 
     // HERE
-    #pragma omp parallel for reduction(+:sum)
+    #pragma omp parallel for
     for (j = 0; j < lastrow - firstrow + 1; j++) {
       sum = 0.0;
       for (k = rowstr[j]; k < rowstr[j+1]; k++) {
@@ -423,8 +423,9 @@ static void conj_grad(int colidx[],
   // First, form A.z
   // The partition submatrix-vector multiply
   //---------------------------------------------------------------------
+  // HERE
   sum = 0.0;
-  #pragma omp parallel for reduction(+:d)
+  #pragma omp parallel for
   for (j = 0; j < lastrow - firstrow + 1; j++) {
     d = 0.0;
     for (k = rowstr[j]; k < rowstr[j+1]; k++) {
