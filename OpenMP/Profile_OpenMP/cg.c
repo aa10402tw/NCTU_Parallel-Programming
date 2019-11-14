@@ -232,7 +232,7 @@ int main(int argc, char *argv[])
 
   timer_stop(T_init);
 
-  printf(" Initialization time = %15.3f seconds\n", timer_read(T_init));
+  //printf(" Initialization time = %15.3f seconds\n", timer_read(T_init));
 
   timer_start(T_bench);
 
@@ -269,10 +269,11 @@ int main(int argc, char *argv[])
 
     zeta = SHIFT + 1.0 / norm_temp1;
     
+	/*
     if (it == 1) 
       printf("\n   iteration           ||r||                 zeta\n");
     printf("    %5d       %20.14E%20.13f\n", it, rnorm, zeta);
-    
+    */
 
     //---------------------------------------------------------------------
     // Normalize z to obtain x
@@ -309,7 +310,7 @@ int main(int argc, char *argv[])
     //printf(" The correct zeta is %20.13E\n", zeta_verify_value);
   }
   
-  printf("\n\nExecution time : %lf seconds\n\n", t);
+  //printf("\n\nExecution time : %lf seconds\n\n", t);
   for(int T_idx=T_conj_grad+1; T_idx<T_last; T_idx++) {
     printf("(%d) [%.8f sec]\n", T_idx, timer_read(T_idx));
   }
