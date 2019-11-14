@@ -127,7 +127,6 @@ int main(int argc, char *argv[])
   tran    = 314159265.0;
   amult   = 1220703125.0;
   zeta    = randlc(&tran, amult);
-  printf("\n\n tran:%.4f, amult:%.4f, Zeta:%.4f, \n\n", tran, amult, zeta);
 
   //---------------------------------------------------------------------
   //  
@@ -148,7 +147,7 @@ int main(int argc, char *argv[])
   //      to local, i.e., (0 --> lastcol-firstcol)
   //---------------------------------------------------------------------
   timer_start(T_150);
-  #pragma omp parallel for private(j, k)
+  #pragma omp parallel for schedule(dynamic, 128) private(j, k)
   for (j = 0; j < lastrow - firstrow + 1; j++) {
     for (k = rowstr[j]; k < rowstr[j+1]; k++) {
       colidx[k] = colidx[k] - firstcol;
@@ -256,9 +255,9 @@ int main(int argc, char *argv[])
     // Also, find norm of z
     // So, first: (z.z)
     //---------------------------------------------------------------------
-    timer_start(T_262);
     norm_temp1 = 0.0;
     norm_temp2 = 0.0;
+	timer_start(T_262);
     #pragma omp parallel for reduction(+:norm_temp1, norm_temp2)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       norm_temp1 = norm_temp1 + x[j]*z[j];
@@ -457,8 +456,7 @@ static void conj_grad(int colidx[],
   // The partition submatrix-vector multiply
   //---------------------------------------------------------------------
   timer_start(T_462);
-  sum = 0.0;
-  #pragma omp parallel for schedule(dynamic, 1) private(d, j)
+  #pragma omp parallel for schedule(dynamic, 128) private(d, j)
   for (j = 0; j < lastrow - firstrow + 1; j++) {
     d = 0.0;
     for (k = rowstr[j]; k < rowstr[j+1]; k++) {
@@ -472,6 +470,7 @@ static void conj_grad(int colidx[],
   // At this point, r contains A.z
   //---------------------------------------------------------------------
   timer_start(T_475);
+  sum = 0.0;
   #pragma omp parallel for reduction(+:sum)
   for (j = 0; j < lastcol-firstcol+1; j++) {
     d   = x[j] - r[j];
