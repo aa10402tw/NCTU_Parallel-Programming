@@ -147,7 +147,8 @@ int main(int argc, char *argv[])
   //      to local, i.e., (0 --> lastcol-firstcol)
   //---------------------------------------------------------------------
   timer_start(T_150);
-  #pragma omp parallel for schedule(dynamic, 128) private(j, k)
+  int chunk_size = (lastrow - firstrow + 1) / 32;
+  #pragma omp parallel for schedule(dynamic, chunk_size) private(j, k)
   for (j = 0; j < lastrow - firstrow + 1; j++) {
     for (k = rowstr[j]; k < rowstr[j+1]; k++) {
       colidx[k] = colidx[k] - firstcol;

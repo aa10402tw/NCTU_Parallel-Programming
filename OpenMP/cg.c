@@ -7,6 +7,8 @@
 #include "timers.h"
 #include "omp.h"
 
+int CHUNK_SIZE;
+
 //---------------------------------------------------------------------
 /* common / main_int_mem / */
 static int colidx[NZ];
@@ -170,6 +172,8 @@ int main(int argc, char *argv[])
 
   zeta = 0.0;
 
+  CHUNK_SIZE = (lastcol - firstcol + 1) / 64;
+
   //---------------------------------------------------------------------
   //---->
   // Do one iteration untimed to init all code and data page tables
@@ -189,7 +193,7 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
     norm_temp1 = 0.0;
     norm_temp2 = 0.0;
-    #pragma omp parallel for reduction(+:norm_temp1, norm_temp2)
+    #pragma omp parallel for reduction(+:norm_temp1, norm_temp2) private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       norm_temp1 = norm_temp1 + x[j] * z[j];
       norm_temp2 = norm_temp2 + z[j] * z[j];
@@ -244,7 +248,7 @@ int main(int argc, char *argv[])
     //---------------------------------------------------------------------
     norm_temp1 = 0.0;
     norm_temp2 = 0.0;
-    #pragma omp parallel for reduction(+:norm_temp1, norm_temp2)
+    #pragma omp parallel for reduction(+:norm_temp1, norm_temp2) private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       norm_temp1 = norm_temp1 + x[j]*z[j];
       norm_temp2 = norm_temp2 + z[j]*z[j];
@@ -331,7 +335,7 @@ static void conj_grad(int colidx[],
   // rho = r.r
   // Now, obtain the norm of r: First, sum squares of r elements locally...
   //---------------------------------------------------------------------
-  #pragma omp parallel for reduction(+:rho)
+  #pragma omp parallel for reduction(+:rho) private(j)
   for (j = 0; j < lastcol - firstcol + 1; j++) {
     rho = rho + r[j]*r[j];
   }
@@ -354,7 +358,7 @@ static void conj_grad(int colidx[],
     //       The unrolled-by-8 version below is significantly faster
     //       on the Cray t3d - overall speed of code is 1.5 times faster.
 
-    #pragma omp parallel for private(j, k, sum)
+    #pragma omp parallel for schedule(dynamic, CHUNK_SIZE) private(j, k, sum) 
     for (j = 0; j < lastrow - firstrow + 1; j++) {
       sum = 0.0;
       for (k = rowstr[j]; k < rowstr[j+1]; k++) {
@@ -367,7 +371,7 @@ static void conj_grad(int colidx[],
     // Obtain p.q
     //---------------------------------------------------------------------
     d = 0.0;
-    #pragma omp parallel for reduction(+:d)
+    #pragma omp parallel for reduction(+:d) private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       d = d + p[j]*q[j];
     }
@@ -398,7 +402,7 @@ static void conj_grad(int colidx[],
     // Now, obtain the norm of r: First, sum squares of r elements locally...
     //---------------------------------------------------------------------
     rho = 0.0;
-    #pragma omp parallel for reduction(+:rho)
+    #pragma omp parallel for reduction(+:rho) private(j)
     for (j = 0; j < lastcol - firstcol + 1; j++) {
       rho = rho + r[j]*r[j];
     }
@@ -422,7 +426,7 @@ static void conj_grad(int colidx[],
   // First, form A.z
   // The partition submatrix-vector multiply
   //---------------------------------------------------------------------
-  sum = 0.0;
+  
   #pragma omp parallel for private(j, d, k)
   for (j = 0; j < lastrow - firstrow + 1; j++) {
     d = 0.0;
@@ -435,7 +439,8 @@ static void conj_grad(int colidx[],
   //---------------------------------------------------------------------
   // At this point, r contains A.z
   //---------------------------------------------------------------------
-  #pragma omp parallel for reduction(+:sum)
+  sum = 0.0;
+  #pragma omp parallel for reduction(+:sum) private(j, d)
   for (j = 0; j < lastcol-firstcol+1; j++) {
     d   = x[j] - r[j];
     sum = sum + d*d;
