@@ -380,7 +380,8 @@ static void conj_grad(int colidx[],
     //       The unrolled-by-8 version below is significantly faster
     //       on the Cray t3d - overall speed of code is 1.5 times faster.
     timer_start(T_385);
-    #pragma omp parallel for schedule(dynamic, 128) private(j, k, sum) 
+	int chunk_size = (lastrow - firstrow + 1) / 32;
+    #pragma omp parallel for schedule(dynamic, chunk_size) private(j, k, sum) 
     for (j = 0; j < lastrow - firstrow + 1; j++) {
       sum = 0.0;
       for (k = rowstr[j]; k < rowstr[j+1]; k++) {
@@ -457,7 +458,7 @@ static void conj_grad(int colidx[],
   // The partition submatrix-vector multiply
   //---------------------------------------------------------------------
   timer_start(T_462);
-  #pragma omp parallel for schedule(dynamic, 128) private(d, j)
+  #pragma omp parallel for schedule(dynamic, chunk_size) private(d, k, j)
   for (j = 0; j < lastrow - firstrow + 1; j++) {
     d = 0.0;
     for (k = rowstr[j]; k < rowstr[j+1]; k++) {
