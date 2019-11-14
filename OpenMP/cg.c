@@ -508,6 +508,8 @@ static void makea(int n,
   //---------------------------------------------------------------------
   // Generate nonzero positions and save for the use in sparse.
   //---------------------------------------------------------------------
+
+  #pragma omp parallel for firstprivate(n, nzv, nn1, vc, ivc) private(iouter, ivelt)
   for (iouter = 0; iouter < n; iouter++) {
     nzv = NONZER;
     sprnvc(n, nzv, nn1, vc, ivc);
