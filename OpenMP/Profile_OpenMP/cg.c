@@ -458,6 +458,7 @@ static void conj_grad(int colidx[],
   // The partition submatrix-vector multiply
   //---------------------------------------------------------------------
   timer_start(T_462);
+  int chunk_size = (lastrow - firstrow + 1) / 32;
   #pragma omp parallel for schedule(dynamic, chunk_size) private(d, k, j)
   for (j = 0; j < lastrow - firstrow + 1; j++) {
     d = 0.0;
