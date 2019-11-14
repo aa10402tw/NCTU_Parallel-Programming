@@ -562,6 +562,7 @@ static void sparse(double a[],
   //---------------------------------------------------------------------
   // ...count the number of triples in each row
   //---------------------------------------------------------------------
+  #pragma omp parallel for
   for (j = 0; j < nrows+1; j++) {
     rowstr[j] = 0;
   }
