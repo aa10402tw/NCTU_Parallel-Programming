@@ -5,7 +5,6 @@
 #include "globals.h"
 #include "randdp.h"
 #include "timers.h"
-#include "omp.h"
 
 //---------------------------------------------------------------------
 /* common / main_int_mem / */
