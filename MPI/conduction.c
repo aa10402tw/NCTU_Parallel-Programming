@@ -12,13 +12,20 @@
 
 #define isDebug 0
 
-void syncBoundaryRow(int row_start, int row_end, int my_rank, int world_size, int*mat) {
+void syncBoundaryRow(int* mat, int row_start, int row_end, int my_rank, int world_size) {
+    // Send start row to previous node
     if(my_rank > 0) 
       MPI_Send( &mat[row_start*W], W, MPI_INT, my_rank-1, 0, MPI_COMM_WORLD);
+
+    // Send end row to next node
     if(my_rank+1 < world_size)
       MPI_Send( &mat[(row_end-1)*W], W, MPI_INT, my_rank+1, 0, MPI_COMM_WORLD);
+
+    // Get (start-1) row from previous node
     if(my_rank+1 < world_size)
       MPI_Recv( &mat[row_end*W], W, MPI_INT, my_rank+1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
+    
+    // Get (end+1) row from next node
     if(my_rank > 0)
       MPI_Recv( &mat[(row_start-1)*W], W, MPI_INT, my_rank-1, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
 }
@@ -48,8 +55,11 @@ int main(int argc, char **argv) {
   MPI_Get_processor_name(processor_name, &name_len);
 
   MPI_Barrier(MPI_COMM_WORLD);
-  if(isDebug)
+  if(isDebug){
+    MPI_Barrier(MPI_COMM_WORLD);
     printf("Process Rank:(%d/%d), from host [%s]\n", my_rank+1, world_size, processor_name);
+    MPI_Barrier(MPI_COMM_WORLD);
+  }
 
   /* Initialize arguments */
   int L, iteration, seed;
@@ -79,61 +89,62 @@ int main(int argc, char **argv) {
     temp = malloc(L*W*sizeof(int));           // Current temperature
     next = malloc(L*W*sizeof(int));           // Next time step
   }
-  int n_row = L / world_size;
-  int row_start = n_row*my_rank;
-  int row_end   = n_row*my_rank+n_row;
   
-  // Init Temperature
+  // Random Init Temperature
   for (int i = 0; i < L; i++) {
     for (int j = 0; j < W; j++) {
       temp[i*W+j] = random()>>3;
     }
   }
 
-  // Start Conduction
+  /* Start Conduction */
   int count = 0, local_balance = 0, global_balance=0;
-  MPI_Barrier(MPI_COMM_WORLD);
-  if(isDebug)
+  int n_row = L / world_size;
+  int row_start = n_row*my_rank;
+  int row_end   = n_row*my_rank+n_row;
+  if(isDebug) {
+    MPI_Barrier(MPI_COMM_WORLD);
     printf("conduction from %d, process:(start:%d, end:%d)\n", my_rank, row_start, row_end);
-  MPI_Barrier(MPI_COMM_WORLD);
+    MPI_Barrier(MPI_COMM_WORLD);
+  }
   while (iteration--) {     // Compute with up, left, right, down points
     local_balance = 1;
     count++;
     for (int i = row_start; i < row_end; i++) {
       for (int j = 0; j < W; j++) {
         /*
-        1. t_new = t + Diffusivity * (d1 + d2 + d3 + d4)
-        2. t_new = t + Diffusivity * ( (t1-t) + (t2-t) + (t3-t) + (t4-t) )
-        3. t_new = Diffusivity * [ (t/Diffusivity) + (t1 + t2 + t3 + t4) - 4*(t) ]
-        4. t_new = [(t/Diffusivity) - 4*(t) + (t1 + t2 + t3 + t4)] * Diffusivity
+        t_new = t + Diffusivity * (d1 + d2 + d3 + d4)
+        => t_new = t + Diffusivity * ( (t1-t) + (t2-t) + (t3-t) + (t4-t) )
+        => t_new = Diffusivity * [ (t/Diffusivity) + (t1 + t2 + t3 + t4) - 4*(t) ]
+        => t_new = [(t/Diffusivity) - 4*(t) + (t1 + t2 + t3 + t4)] * Diffusivity
         */
 
-        // (t/Diffusivity)
+        // t_new = (t/Diffusivity)
         float t = temp[i*W+j] / d; 
         
-        // - 4*(t)
+        // t_new = t_new - 4*(t)
         t += temp[i*W+j] * -4; 
 
-        // + (t1 + t2 + t3 + t4)
+        // t_new = t_new + (t1 + t2 + t3 + t4)
         t += temp[(i - 1 <  0 ? 0 : i - 1) * W + j];
         t += temp[(i + 1 >= L ? i : i + 1) * W + j];
         t += temp[i * W + (j - 1 <  0 ? 0 : j - 1)];
         t += temp[i * W + (j + 1 >= W ? j : j + 1)];
 
-        // [] * Diffusivity 
+        // t_new = t_new * Diffusivity 
         t *= d;
         next[i*W+j] = t ;
 
-        // Not balance yet
+        // If tempature change, it's not balance yet
         if (next[i*W+j] != temp[i*W+j]) {
           local_balance = 0;
         }
       }
     }
     
-    // Synchronize Boundary Row
+    // Synchronize boundary row
     MPI_Barrier(MPI_COMM_WORLD);
-    syncBoundaryRow(row_start, row_end, my_rank, world_size, next);
+    syncBoundaryRow(next, row_start, row_end, my_rank, world_size);
     
     // Check if all temperaute is balance
     MPI_Barrier(MPI_COMM_WORLD);

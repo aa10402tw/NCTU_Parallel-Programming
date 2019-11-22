@@ -4,5 +4,6 @@
 	
 # Tempature Conduction
 	mpicc -o conduction conduction.c
+	mpiexec -n 1 conduction 20 100 0
 	mpiexec -n 4 conduction 20 100 0
 
