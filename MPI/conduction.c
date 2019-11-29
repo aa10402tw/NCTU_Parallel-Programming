@@ -79,6 +79,13 @@ int main(int argc, char **argv) {
     }
     temp = malloc(L*W*sizeof(int));          // Current temperature
     next = malloc(L*W*sizeof(int));          // Next time step
+
+    // Random Init Temperature
+    for (int i = 0; i < L; i++) {
+      for (int j = 0; j < W; j++) {
+        temp[i*W+j] = random()>>3;
+      }
+    }
   }
   else{
     MPI_Recv( &L,         1, MPI_INT, MASTER_RANK, 0, MPI_COMM_WORLD, MPI_STATUS_IGNORE);
@@ -90,12 +97,8 @@ int main(int argc, char **argv) {
     next = malloc(L*W*sizeof(int));           // Next time step
   }
   
-  // Random Init Temperature
-  for (int i = 0; i < L; i++) {
-    for (int j = 0; j < W; j++) {
-      temp[i*W+j] = random()>>3;
-    }
-  }
+  // Synchronize Init Tempature
+  MPI_Bcast( temp, L*W, MPI_INT, MASTER_RANK, MPI_COMM_WORLD);
 
   /* Start Conduction */
   int count = 0, local_balance = 0, global_balance=0;
@@ -160,14 +163,14 @@ int main(int argc, char **argv) {
     next = tmp;
   }
 
-  // Find min tempature
+  /* Find min tempature */
   int local_min, global_min;
   MPI_Barrier(MPI_COMM_WORLD);
   local_min = findMatMin(temp, row_start, row_end);
   MPI_Reduce(&local_min, &global_min, 1, MPI_INT, MPI_MIN, MASTER_RANK, MPI_COMM_WORLD);
   MPI_Barrier(MPI_COMM_WORLD);
 
-  // Print Result
+  /* Print Result */
   if(my_rank == MASTER_RANK) {
     printf("Size: %d*%d, Iteration: %d, Min Temp: %d\n", L, W, count, global_min);
   }
