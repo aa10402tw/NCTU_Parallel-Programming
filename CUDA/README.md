@@ -4,8 +4,8 @@
 
 # Homework Serial Version
     gcc serial_wave.c -o serial_wave -lm
-    serial_wave.exe 25 100
+    ./serial_wave.exe 25 100
 
 # Homework CUDA Version
     nvcc cuda_wave.cu -o cuda_wave
-    cuda_wave.exe 25 100
+    ./cuda_wave 25 100
