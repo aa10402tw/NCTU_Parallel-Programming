@@ -1,2 +1,5 @@
 /MPI/conduction
 /MPI/mpi_hello_world
+/CUDA/*.exe
+/CUDA/*.exp
+/CUDA/*.lib
