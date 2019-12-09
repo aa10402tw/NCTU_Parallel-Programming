@@ -112,7 +112,7 @@ __global__ void update_kernel(float* oldval, float* values, float* newval, int n
 int main(int argc, char *argv[])
 {
     int nsteps,                     /* number of time steps */
-        tpoints,                    /* total points along string */
+        tpoints;                    /* total points along string */
 	
 	clock_t begin, end;
 	double time_elapsed;

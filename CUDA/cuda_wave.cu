@@ -111,8 +111,8 @@ __global__ void update_kernel(float* oldval, float* values, float* newval, int n
  *********************************************************************/
 int main(int argc, char *argv[])
 {
-    int nsteps,                     /* number of time steps */
-        tpoints,                    /* total points along string */
+	int nsteps,                     /* number of time steps */
+		tpoints;                    /* total points along string */
   
     /* Read Parameters */
     sscanf(argv[1], "%d", &tpoints);
