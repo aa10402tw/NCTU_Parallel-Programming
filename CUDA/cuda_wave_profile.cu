@@ -113,7 +113,6 @@ int main(int argc, char *argv[])
 {
     int nsteps,                     /* number of time steps */
         tpoints,                    /* total points along string */
-        rcode;                      /* generic return code */
 	
 	clock_t begin, end;
 	double time_elapsed;
@@ -131,7 +130,6 @@ int main(int argc, char *argv[])
     int threadsPerBlock = 512;
     int numBlocks = (tpoints / threadsPerBlock) + 1;
 
-	
     /* Allocate Host Memory */
 	begin = clock();
     float *oldval, *values, *newval;
@@ -155,7 +153,6 @@ int main(int argc, char *argv[])
 
     /* Initialize Wave */
 	begin = clock();
-    //printf("Initializing points on the line...\n");
     init_line_kernel <<<numBlocks, threadsPerBlock>>> (gpu_oldval, gpu_values, tpoints);
 	cudaDeviceSynchronize();
 	end = clock();
@@ -164,7 +161,6 @@ int main(int argc, char *argv[])
 
     /* Update Wave */
 	begin = clock();
-    //printf("Updating all points for all time steps...\n");
     update_kernel <<<numBlocks, threadsPerBlock>>> (gpu_oldval, gpu_values, gpu_newval, nsteps, tpoints);
 	cudaDeviceSynchronize();
 	end = clock();
@@ -182,12 +178,5 @@ int main(int argc, char *argv[])
 	printf("Time to Copy Memory from Device to Host %f\n", time_elapsed);
 
     /* Print Result */
-	begin = clock();
-    //printf("Printing final results...\n");
-    //printfinal(values, tpoints);
-    //printf("\nDone.\n\n");
-	end = clock();
-	time_elapsed = (double)(end - begin) / CLOCKS_PER_SEC;
-	printf("Time to Print Result %f\n", time_elapsed);
     return 0;
 }

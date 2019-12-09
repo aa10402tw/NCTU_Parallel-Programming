@@ -113,8 +113,7 @@ int main(int argc, char *argv[])
 {
     int nsteps,                     /* number of time steps */
         tpoints,                    /* total points along string */
-        rcode;                      /* generic return code */
-
+  
     /* Read Parameters */
     sscanf(argv[1], "%d", &tpoints);
     sscanf(argv[2], "%d", &nsteps);
