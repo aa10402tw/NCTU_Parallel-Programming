@@ -193,6 +193,7 @@ int main(int argc, char *argv[])
 
             /* Read Bmp image */
             Image *img = readbmp(filename);
+            std::cout << img->weight << ":" << img->height << "\n";
 
             int n_pixels = img->height * img->weight;
             size_t img_size  = sizeof(uint) * n_pixels;
@@ -201,14 +202,13 @@ int main(int argc, char *argv[])
             size_t partial_hist_size = hist_size * num_group;
             
             /* Create OpenCL Buffer */ 
-            cl_event img_evt, hist_evt;
             cl_mem cl_img = clCreateBuffer(myctx, CL_MEM_READ_ONLY,   img_size,  NULL, &clError);
             cl_mem cl_his = clCreateBuffer(myctx, CL_MEM_WRITE_ONLY,  hist_size, NULL, &clError);
             cl_mem cl_partial_his = clCreateBuffer(myctx, CL_MEM_WRITE_ONLY,  partial_hist_size, NULL, &clError);
             uint32_t result_his[256*3];
             memset(result_his, 0, hist_size);
-            clError |= clEnqueueWriteBuffer(myque, cl_his, CL_TRUE, 0, hist_size, result_his, 0, NULL, &hist_evt);
-            clError |= clEnqueueWriteBuffer(myque, cl_img, CL_TRUE, 0, img_size,  img->data,  0, NULL, &img_evt);
+            clError |= clEnqueueWriteBuffer(myque, cl_his, CL_TRUE, 0, hist_size, result_his, 0, NULL, NULL);
+            clError |= clEnqueueWriteBuffer(myque, cl_img, CL_TRUE, 0, img_size,  img->data,  0, NULL, NULL);
             if(clError != CL_SUCCESS) {
                 printf("clCreateBuffer fails (%d)\n", clError);
                 return -1;
@@ -243,11 +243,10 @@ int main(int argc, char *argv[])
             }
             
             /* Execute OpenCL Kernel (kernel_cal_partial) */
-            cl_event cal_evt, comb_evt;
             size_t local_work_size  = 256;
             size_t global_work_size = local_work_size * num_group;
             
-            clError = clEnqueueNDRangeKernel(myque, kernel_cal_partial, 1, 0, &global_work_size, &local_work_size, 0, NULL, &cal_evt);
+            clError = clEnqueueNDRangeKernel(myque, kernel_cal_partial, 1, 0, &global_work_size, &local_work_size, 0, NULL, NULL);
             if(clError != CL_SUCCESS) {
                 printf("clEnqueueNDRangeKernel cal_partial fails (%d)\n", clError);
                 return -1;
@@ -255,14 +254,13 @@ int main(int argc, char *argv[])
             /* Execute OpenCL Kernel (kernel_comb_partial) */
             size_t partial_global_work_size = 256*3;
             size_t partial_local_work_size  = 256;
-            clError = clEnqueueNDRangeKernel(myque, kernel_comb_partial, 1, 0, &partial_global_work_size, &partial_local_work_size, 0, NULL, &comb_evt);
+            clError = clEnqueueNDRangeKernel(myque, kernel_comb_partial, 1, 0, &partial_global_work_size, &partial_local_work_size, 0, NULL, NULL);
             if(clError != CL_SUCCESS) {
                 printf("clEnqueueNDRangeKernel comb_partial fails (%d)\n", clError);
                 return -1;
             }
             /* Read Result from OpenCL Buffer */
-            cl_event read_hist_evt;
-            clError = clEnqueueReadBuffer(myque, cl_his, CL_TRUE, 0, hist_size, result_his, 0, NULL, &read_hist_evt);
+            clError = clEnqueueReadBuffer(myque, cl_his, CL_TRUE, 0, hist_size, result_his, 0, NULL, NULL);
             if(clError != CL_SUCCESS) {
                 printf("clEnqueueReadBuffer fails (%d)\n", clError);
                 return -1;
@@ -308,9 +306,8 @@ int main(int argc, char *argv[])
                         ret->data[256*i+j].B = 255;
                 }
             }
-            std::string newfile = "opencl_hist_" + std::string(filename); 
+            std::string newfile = "hist_" + std::string(filename); 
             writebmp(newfile.c_str(), ret);
-            evt_end("write bmp");
         }
     }else{
         printf("Usage: ./hist <img.bmp> [img2.bmp ...]\n");
