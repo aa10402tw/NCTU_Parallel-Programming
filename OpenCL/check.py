@@ -8,7 +8,7 @@ parser.add_argument("--img_dir", default=".")
 parser.add_argument("--img_name", default="airplane")
 args = parser.parse_args()
 
-print("Compare {} and {} ...".format(
+print("Compare [{}] and [{}] ...".format(
 	"serial_hist_{}.bmp".format(args.img_name), 
 	"opencl_hist_{}.bmp".format(args.img_name))
 )
