@@ -1,22 +1,22 @@
 Table of Contents
 =================
-  * [Pthread](#Pthread)
-  * [OpenMP](#OpenMP)
-  * [MPI](#MPI)
-  * [CUDA](#CUDA)
-  * [OpenCL](#OpenCL)
+  * [Pthread (Multi-Cores)](#Pthread)
+  * [OpenMP (Multi-Cores)](#OpenMP)
+  * [MPI (Distributed Computing)](#MPI)
+  * [CUDA (GPU)](#CUDA)
+  * [OpenCL (GPU)](#OpenCL)
   
 ## Pthread
-Parallelization of pi computation using Monte Carlo method (acceleration using multi-cores).
+Parallelization of pi computation using Monte Carlo method.
 
 ## OpenMP
-Parallelization of conjugate gradient method (acceleration using multi-cores).
+Parallelization of conjugate gradient method.
 
 ## MPI
-Parallelization of heat conduction simulation (acceleration using distributed computing).
+Parallelization of heat conduction simulation.
 
 ## CUDA
-Parallelization of wave simulation (acceleration using GPU).
+Parallelization of wave simulation.
 
 ## OpenCL
-Parallelization of image histogram (acceleration using GPU).
+Parallelization of image histogram.
